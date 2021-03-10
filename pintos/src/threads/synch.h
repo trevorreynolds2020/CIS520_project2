@@ -9,9 +9,7 @@ struct semaphore
   {
     unsigned value;             /* Current value. */
     struct list waiters;        /* List of waiting threads. */
-    
   };
-/* One semaphore in a list. */
 
 void sema_init (struct semaphore *, unsigned value);
 void sema_down (struct semaphore *);
@@ -43,10 +41,8 @@ void cond_wait (struct condition *, struct lock *);
 void cond_signal (struct condition *, struct lock *);
 void cond_broadcast (struct condition *, struct lock *);
 
-//BEGIN MODIFICATION
-bool priority_less_cond( struct list_elem *first, struct list_elem *second, void *);
-//END MODIFICATION
 /* Optimization barrier.
+
    The compiler will not reorder operations across an
    optimization barrier.  See "Optimization Barriers" in the
    reference guide for more information.*/

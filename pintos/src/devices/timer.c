@@ -7,7 +7,6 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-#include <kernel/list.h> //ADDED 
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -20,9 +19,6 @@
 
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
-
-//ADDED list of sleeping threads 
-struct list s_list;
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
@@ -41,7 +37,6 @@ timer_init (void)
 {
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-  list_init (&s_list); //ADDED initalizes the list of sleeping threads when timer is initialized
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -94,24 +89,11 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
+  int64_t start = timer_ticks ();
 
-	struct thread* current_thread; //ADDED current thread to be created an added to list after assigned a wake up time
-	enum intr_level current_level; //ADDED interrupt level for the current thread
-
-  ASSERT (intr_get_level () == INTR_ON); //ADDED checks whether or not the interrupt level is on
-
-  current_level = intr_disable(); //ADDED sets current level of interrupt for thread
-
-  current_thread = thread_current(); //ADDED sets current thread
-
-  current_thread->waketick = timer_ticks() + ticks; //ADDED sets the timer on thread before it wakes up
-
-  list_insert_ordered (&s_list, &current_thread->elem, cmp_waketick, NULL); //ADDED adds current thread to the list based on time before execution
-
-  thread_block(); //ADDED blocks the current thread to keep it from executing
-
-  intr_set_level(current_level);  //ADDED sets interrupt level so this thread executes without interrupting other threads
-
+  ASSERT (intr_get_level () == INTR_ON);
+  while (timer_elapsed (start) < ticks) 
+    thread_yield ();
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -188,24 +170,8 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-	struct list_elem *h; //ADDED head of the threads list
-	struct thread *h_thread; //ADDED first thread in list
-
   ticks++;
   thread_tick ();
-
-  //ADDED loops through sleepy threads until there aren't any
-	while(!list_empty(&s_list))
-	{
-		h = list_front(&s_list); //ADDED gets the beginning of list
-	  h_thread = list_entry (h, struct thread, elem); //ADDED takes that thread and assigns it
-
-	  	if(h_thread->waketick > ticks ) //ADDED checks the head of the list for timer that has passed it's wake time
-	  		break;
-
-	  	list_remove (h); //ADDED removes current thread (head of the list)
-	  	thread_unblock(h_thread); //ADDED executes the thread and always it to go
-	}
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

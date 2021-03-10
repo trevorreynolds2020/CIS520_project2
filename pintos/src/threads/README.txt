@@ -1,1 +1,12 @@
-In order to add a process to the system I changed 'tests.c' to include 'alarm-mega-test' as one of the tests listed and ran by the program. Second, I located the 'tests.h' file to include the new test. Then, I editted 'alarm-wait' to include to run 70 alarms with a 5 second delay. Additionally, added an almost identical file to 'alarm-multiple.ck' called 'alarm-mega.ck' with the number of alarms changed to 70. Furthermore, I had to issue the 'make' command within 'pintos/src/threads' to updates to system. Finally, I ran 'pintos -v -- run alarm-mega > log-mega.txt' to log the output from the process (which is just 70 alarms).
+Leif White CIS 520 Proj 1 submission.
+
+I modified the following files:
+
+Rubric.alarm
+alarm-wait.c
+tests.c
+tests.h
+
+I added the following file:
+
+alarm-mega.ck
