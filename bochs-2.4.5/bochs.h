@@ -486,6 +486,7 @@ BOCHSAPI extern bx_debug_t bx_dbg;
 #if BX_GUI_SIGHANDLER
 extern bx_bool bx_gui_sighandler;
 #endif
+extern int jitter;
 
 // This value controls how often each I/O device's periodic() method
 // gets called.  The timer is set up in iodev/devices.cc.
@@ -609,6 +610,5 @@ void bx_center_print(FILE *file, const char *line, unsigned maxwidth);
 }
 
 #endif
-extern int jitter;
 
 #endif  /* BX_BOCHS_H */
